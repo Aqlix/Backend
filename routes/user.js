@@ -9,7 +9,7 @@ const upload = multer({ storage: storage });
 
 router.post('/register', upload.single('file') , async (req,res)=>{
 
-const { fullName , email , username , password, } = req.body;
+const { fullName , email , username , password, file } = req.body;// Extract the file data from the request
 
 if( !(fullName && email && username && password)){
     res.status(403).send('fill all credentials!')
@@ -22,8 +22,8 @@ if(ExistingUser){
 }
 const EncPass = await bcrypt.hash(password,10);
 
- // Extract the file data from the request
- const file = req.file;
+ 
+ 
 
  // Encode the file data as base64
  const base64File = file ? file.buffer.toString('base64') : null;

@@ -36,7 +36,7 @@ const UserData  = await UserModel.create({
     email : email,
     username: username,
     password:EncPass,
-    file: base64File
+    image: base64File
     
 })
 console.log(UserData)

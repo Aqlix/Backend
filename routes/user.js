@@ -1,50 +1,65 @@
-const express =  require('express');
-const router =  express.Router();
-const UserModel =  require('../models/user');
+const express = require('express');
+const router = express.Router();
+const UserModel = require('../models/user');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 
-const storage = multer.memoryStorage();
+// Configure multer for handling file uploads
+const storage = multer.diskStorage({
+  destination: 'uploads/',
+  filename: (req, file, cb) => {
+    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, file.originalname);
+  }
+});
+
 const upload = multer({ storage: storage });
 
-router.post('/register', upload.single('file') , async (req,res)=>{
+// <<<<<-----register route ---->>>>>//
 
-const { fullName , email , username , password, file } = req.body;// Extract the file data from the request
+router.post('/register', upload.single('file'), async (req, res) => {
+  try {
+    const { fullName, email, username, password } = req.body;
 
-if( !(fullName && email && username && password)){
-    res.status(403).send('fill all credentials!')
-}
+    if (!(fullName && email && username && password)) {
+      return res.status(400).json({ error: 'Fill all credentials!' });
+    }
 
-const ExistingUser =  await UserModel.findOne({email: email })
+    const existingUser = await UserModel.findOne({ email: email });
 
-if(ExistingUser){
-    res.status(403).send('User Already exists!!')
-}
-const EncPass = await bcrypt.hash(password,10);
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists!' });
+    }
 
- 
- 
+    const encPass = await bcrypt.hash(password, 10);
 
- // Encode the file data as base64
- const base64File = file ? file.buffer.toString('base64') : null;
+    // Check if a file was uploaded
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded!' });
+    }
 
-//saving the user in DB
+    // Extract relevant information from the file object
+    const imageName = file.filename;
+    const imagePath =  file.path
+    console.log(imagePath)
+    // Saving the user in DB
+    const userData = await UserModel.create({
+      fullName: fullName,
+      email: email,
+      username: username,
+      password: encPass,
+      image: imageName
+    });
 
-const UserData  = await UserModel.create({
-    // _id: _id,
-    fullName: fullName,
-    email : email,
-    username: username,
-    password:EncPass,
-    image: base64File
-    
-})
-console.log(UserData)
-res.json(UserData);
+    console.log(userData);
+    res.json(userData);
 
-//TODO::token generation using jwt.
-
-})
-
+    // TODO::token generation using jwt.
+  } catch (error) {
+    console.error('Error saving user:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 module.exports = router;

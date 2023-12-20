@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 require('dotenv').config()
 var userRouter = require('./routes/user');
 var editRouter = require('./routes/edit')
@@ -15,7 +16,9 @@ mongoose.connect(process.env.MONGO_DB_URL).then(response=>{
 
 
 app.use(cors())
-app.use(express.json())
+app.use(bodyParser.json());
+app.use('/uploads', express.static('uploads'));
+
 app.use('/', userRouter);
 app.use('/', editRouter);
 

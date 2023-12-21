@@ -35,9 +35,7 @@ router.post('/register', upload.single('file'), async (req, res) => {
 
     // Check if a file was uploaded
     const file = req.file;
-    if (!file) {
-      return res.status(400).json({ error: 'No file uploaded!' });
-    }
+   
 
     // Extract relevant information from the file object
     const imageName = file.filename;

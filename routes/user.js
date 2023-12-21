@@ -51,7 +51,7 @@ router.post('/register', upload.single('file'), async (req, res) => {
     });
 
     console.log(userData);
-    res.json({userData});
+    res.json({ status: 'success', file, fullName, username, email, password });
 
     // TODO::token generation using jwt.
   } catch (error) {
